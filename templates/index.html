@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/homepage.css')}}">
+    <script src="{{ url_for('static', filename='js/plotly.js/plotly.min.js')}}"></script>
+	<script src="{{ url_for('static', filename='js/paho.mqtt/paho-mqtt-min.js')}}"></script>
+	<title>Web Vibration Monitor</title>
+<!--	<link rel="icon" type="image/png" href="https://e7.pngegg.com/pngimages/446/511/png-clipart-computer-icons-scalable-graphics-favicon-link-symbol.png"/>-->
+</head>
+<body>
+    <h1 class="sansserif">Vibration Data From Accelerometers</h1>
+	<div id="chart">
+		<script src="{{ url_for('static', filename='js/graphing.js')}}"></script>
+	</div>
+</body>
+</html>

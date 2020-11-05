@@ -1,0 +1,9 @@
+body 
+{
+    background-color: light blue;
+}
+
+.sansserif {
+  font-family: Arial, Helvetica, sans-serif;
+  text-align: center;
+}
