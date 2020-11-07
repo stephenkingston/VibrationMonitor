@@ -1,7 +1,7 @@
 function getData()
-	{
-		return Math.random();
-	}
+{
+    return Math.random()
+}
 
 Plotly.plot('chart', [{
 	y:[getData()],
@@ -25,34 +25,31 @@ setInterval(function(){
 }, 10);
 
 
-/* MQTT */
+/* WebSockets */
 
-// Create a client instance
-client = new Paho.MQTT.Client("127.0.0.1", 9001, "clientId");
+//var socket = io();
+//io.connect("ws://127.0.0.1:5000");
+//
+//socket.on('connect', function(){
+//    socket.emit('message', 'SocketIO: User has connected!');
+//    console.log("SocketIO: Connected");
+//});
+//
+//
+//socket.on('message', function(data){
+//        console.log(data);
+//});
+//socket.on('disconnect', function(){});
 
-client.onConnectionLost = onConnectionLost;
-client.onMessageArrived = onMessageArrived;
-const options = {
-                    timeout:3,
-                    onSuccess:onConnect
-                };
-client.connect(options);
+var ws = new WebSocket("ws://127.0.0.1:5678/");
 
-function onConnect() {
-  // Once a connection has been made, make a subscription and send a message.
-  console.log("onConnect");
-  client.subscribe("World");
-  message = new Paho.MQTT.Message("Characters");
-  message.destinationName = "World";
-  client.send(message);
+ws.onmessage = function (event) {
+        console.log(event.data);
+};
+
+ws.connected = function () {
+    console.log("WebSockets: Connected")
 }
 
-function onConnectionLost(responseObject) {
-  if (responseObject.errorCode !== 0) {
-    console.log("onConnectionLost:"+responseObject.errorMessage);
-  }
-}
 
-function onMessageArrived(message) {
-  console.log("onMessageArrived:"+message.payloadString);
-}
+
