@@ -6,14 +6,42 @@
     <script src="{{ url_for('static', filename='js/plotly.js/plotly.min.js')}}"></script>
 	<script src="{{ url_for('static', filename='js/paho.mqtt/paho-mqtt-min.js')}}"></script>
 	<script src="{{ url_for('static', filename='js/socket.io/socket.io.js')}}"></script>
-<!--	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>-->
 	<title>Web Vibration Monitor</title>
 	<link rel="icon" type="image/png" href="https://e7.pngegg.com/pngimages/446/511/png-clipart-computer-icons-scalable-graphics-favicon-link-symbol.png"/>
 </head>
 <body>
-    <h1 class="sansserif">Vibration Data From Accelerometers</h1>
-	<div id="chart">
-		<script src="{{ url_for('static', filename='js/graphing.js')}}"></script>
+<!--	<header class="header"></header>-->
+    <h1 class="header">VIBRATION DATA AND INFERENCE ENGINE</h1>
+<div class="container">
+	<div class="block-cover">
+			<div class="block" id="channel1">
+				<!-- # Graph 1-->
+			</div>
 	</div>
+
+	<div class="block-cover">
+		<div class = "block" id="channel2">
+			<!-- # Graph 2-->
+		</div>
+	</div>
+
+	<div class="block-cover">
+		<div class = "block" id="channel3">
+			<!-- # Graph 3-->
+		</div>
+	</div>
+
+	<div class="block-cover">
+
+		<div class = "block" id="inference">
+			<!-- # Inference -->
+			<h1 class="header">REAL-TIME ML INFERENCE</h1>
+			<h3 class="inferenceClass">Example result: Operation is normal.</h3>
+		</div>
+	</div>
+
+</div>
+<script src="{{ url_for('static', filename='js/util.js')}}"></script>
+<script src="{{ url_for('static', filename='js/graphing.js')}}"></script>
 </body>
 </html>

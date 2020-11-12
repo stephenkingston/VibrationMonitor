@@ -1,5 +1,4 @@
 import asyncio
-import random
 import websockets
 from functools import partial
 

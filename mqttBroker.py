@@ -27,7 +27,14 @@ def disconnected(clientx, userdata, rc):
 
 def MQTTProcess(a, queueObj):
     print("Attempting to connect to MQTT Broker...")
-    client.connect(BrokerHost)
+    try:
+        client.connect(BrokerHost)
+    except Exception as e:
+        print("MQTT connection to broker failed. Retrying...")
+        print(e)
+        MQTTProcess(1, queueObj)
+        time.sleep(20)
+
     time.sleep(1)
     client.user_data_set(queueObj)
     client.subscribe(sensorDataTopic)
