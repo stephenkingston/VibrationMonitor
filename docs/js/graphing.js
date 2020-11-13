@@ -45,6 +45,7 @@ var layout1 = {
 var config = {responsive: true}
 
 Plotly.newPlot('channel1', [{
+	x:[0],
     y:[getData()],
 	type: 'line'
 }], layout1, config);
@@ -52,10 +53,10 @@ Plotly.newPlot('channel1', [{
 var counter = 0;
 
 setInterval(function(){
-	Plotly.extendTraces('channel1', {y:[[getData()]]}, [0]);
+	Plotly.extendTraces('channel1', {x:[[counter/20]], y:[[getData()]]}, [0]);
 	counter++;
 
-	if (counter > 250)
+	if (counter/20 > 5)
 	{
 		Plotly.relayout('channel1', {
 			xaxis: {
@@ -67,11 +68,11 @@ setInterval(function(){
                     color: '#7f7f7f'
                     }
                 },
-				range: [counter - 250, counter]
+				range: [(counter/20) - 5, counter/20]
 			}
 		});
 	}
-}, 10);
+}, 50);
 
 /* Channel 2 */
 
@@ -114,6 +115,7 @@ var layout2 = {
 };
 
 Plotly.newPlot('channel2', [{
+	x:[0],
     y:[getData()],
 	type: 'line'
 }], layout2, config);
@@ -121,10 +123,10 @@ Plotly.newPlot('channel2', [{
 var counter2 = 0;
 
 setInterval(function(){
-	Plotly.extendTraces('channel2', {y:[[getData()]]}, [0]);
+	Plotly.extendTraces('channel2', {x:[[counter/20]], y:[[getData()]]}, [0]);
 	counter2++;
 
-	if (counter2 > 250)
+	if (counter2/20 > 5)
 	{
 		Plotly.relayout('channel2', {
 			xaxis: {
@@ -136,11 +138,11 @@ setInterval(function(){
                     color: '#7f7f7f'
                     }
                 },
-				range: [counter2 - 250, counter2]
+				range: [counter2/20 - 5, counter2/20]
 			}
 		});
 	}
-}, 10);
+}, 50);
 
 
 /* Channel 3 */
@@ -184,6 +186,7 @@ var layout3 = {
 };
 
 Plotly.newPlot('channel3', [{
+	x:[0],
     y:[getData()],
 	type: 'line'
 }], layout3, config);
@@ -191,10 +194,10 @@ Plotly.newPlot('channel3', [{
 var counter3 = 0;
 
 setInterval(function(){
-	Plotly.extendTraces('channel3', {y:[[getData()]]}, [0]);
+	Plotly.extendTraces('channel3', {x:[[counter/20]], y:[[getData()]]}, [0]);
 	counter3++;
 
-	if (counter3 > 250)
+	if (counter3/20 > 5)
 	{
 		Plotly.relayout('channel3', {
 			xaxis: {
@@ -206,11 +209,11 @@ setInterval(function(){
                     color: '#7f7f7f'
                     }
                 },
-				range: [counter3 - 250, counter3]
+				range: [(counter3/20) - 5, counter3/20]
 			}
 		});
 	}
-}, 10);
+}, 50);
 
 /* WebSockets */
 
