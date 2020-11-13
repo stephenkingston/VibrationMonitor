@@ -24,6 +24,7 @@ function reflowLayout() {
             let width1 = 'calc(50% - 3px)';
             item.style.width = width1;
             console.log(width1);
+			item.style.height = 'calc(50% - 3px)';
         }
     }
 }
