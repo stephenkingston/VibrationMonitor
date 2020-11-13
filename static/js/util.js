@@ -13,6 +13,7 @@ function reflowLayout() {
 
         for (let item of classList) {
             item.style.width = "100%";
+            item.style.height = "30%";
         }
     }
     else
