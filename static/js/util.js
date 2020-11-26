@@ -8,7 +8,7 @@ window.onresize = function(event) {
 function reflowLayout() {
     if (window.innerHeight/window.innerWidth >= 1.2)
     {
-        console.log("Portrait View Mode triggered.");
+        console.log("Mobile Mode triggered.");
         let classList = document.getElementsByClassName('block-cover');
 
         for (let item of classList) {
@@ -19,10 +19,11 @@ function reflowLayout() {
     else
     {
         let classList = document.getElementsByClassName('block-cover');
-        console.log("Landscape View Mode triggered.");
+        console.log("Landscape Mode triggered.");
         for (let item of classList) {
             let width1 = 'calc(50% - 3px)';
             item.style.width = width1;
+			item.style.height = 'calc(50% - 3px)';
         }
     }
 }
