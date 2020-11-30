@@ -11,8 +11,6 @@ sensorDataTopic = "AccelData"
 def receiveMessage(clientx, queue, message):
     print(message.topic, message.payload)
     queue.put(message.payload)
-    print(queue.qsize())
-    print(queue.empty())
 
 
 def connected(clientx, userdata, flags, rc):

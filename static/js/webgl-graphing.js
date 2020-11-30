@@ -70,8 +70,8 @@ function main() {
                 color: 'blue',
             },
         ],
-        xRange: { min: 0, max: 5 * 1000 },
-        yRange: { min: -2, max: +2},
+        xRange: { min: 0, max: 50 }, //5 * 1000
+        yRange: { min: -10, max: +20},
         realTime: true,
         zoom: {
             x: {
@@ -88,17 +88,17 @@ function main() {
     let pointCount = 0;
 
     let x = performance.now() - 2000;
-    function update() {
-        const time = performance.now();
-        for (; x < time * 2; x += 1) {
-            const y_random = (Math.random() - 0.5) * 2;
-            //const y_sin = Math.sin(x * 0.002) * 320;
-            dataSin.push({ x, y: y_random });
 
-            const y_random2 = Math.random() * 500 + 100;
-            //const y_cos = Math.cos(x * 0.002) * 200;
-            //dataCos.push({ x, y: y_random2 });
-        }
+    function update(points_all) {
+        const time = performance.now();
+        console.log(points_all);
+        let points = points_all.split(',');
+
+        points.forEach((point, index) => {
+            dataSin.push({ x: pointCount, y: (+point) });
+            pointCount++;
+        });
+        console.log(dataSin);
         chart1.update();
         chart2.update();
         chart3.update();
@@ -106,7 +106,35 @@ function main() {
 
     chart1.options.realTime = true;
     chart2.options.realTime = true;
-    const ev = setInterval(update, 5);
+
+    /* WebSockets */
+
+    var ws = new WebSocket("ws://127.0.0.1:5678/");
+
+    ws.onmessage = function (event) {
+            console.log(event.data);
+            update(bin2string(event.data));
+    };
+
+    ws.connected = function () {
+        console.log("WebSockets: Connected")
+    }
+
+    function bin2string(array){
+	var result = "";
+	for(var i = 0; i < array.length; ++i)
+	{
+	    if (i === 0 || i === 1 || i === array.length - 1)
+	    {}
+	    else
+	    {
+	        result+= array[i];
+	    }
+	}
+	return result;
+    }
+//const ev = setInterval(update, 20);
+
 //    document.getElementById('stop-btn').addEventListener('click', function () {
 //        clearInterval(ev);
 //    });
