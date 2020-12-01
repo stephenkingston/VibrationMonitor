@@ -86,22 +86,33 @@ function main() {
     });
 
     let pointCount = 0;
+    let flagCount = 0;
 
-    let x = performance.now() - 2000;
+    let x = 0;
 
     function update(points_all) {
-        const time = performance.now();
-        console.log(points_all);
+        if (flagCount == 0)
+        {
+            x = performance.now();
+            flagCount = 1;
+        }
+        else
+            flagCount++;
+
         let points = points_all.split(',');
 
         points.forEach((point, index) => {
             dataSin.push({ x: pointCount, y: (+point) });
             pointCount++;
         });
-        console.log(dataSin);
         chart1.update();
         chart2.update();
         chart3.update();
+        if (flagCount === 20)
+        {
+            console.log(performance.now());
+            console.log(performance.now() - x);
+        }
     }
 
     chart1.options.realTime = true;
@@ -112,7 +123,6 @@ function main() {
     var ws = new WebSocket("ws://127.0.0.1:5678/");
 
     ws.onmessage = function (event) {
-            console.log(event.data);
             update(bin2string(event.data));
     };
 

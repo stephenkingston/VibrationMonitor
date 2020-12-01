@@ -9,7 +9,7 @@ async def randomNumbers(websocket, path, queueObj):
         while not queueObj.empty():
             try:
                 await websocket.send(str(queueObj.get()))
-                print("Sent data")
+                # print("Sent data")
             except Exception as e:
                 pass
         await asyncio.sleep(0.03)
