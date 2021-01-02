@@ -206,7 +206,7 @@ Plotly.newPlot('channel3', [{
 
 var counter3 = 0;
 
-setInterval(function(){
+updateChannel3 = function {
 	Plotly.extendTraces('channel3', {x:[[counter/20]], y:[[getData()]]}, [0]);
 	counter3++;
 
@@ -226,7 +226,7 @@ setInterval(function(){
 			}
 		});
 	}
-}, 50);
+}
 
 /* WebSockets */
 
