@@ -106,8 +106,8 @@ function main() {
             pointCount++;
         });
         chart1.update();
-        chart2.update();
-        chart3.update();
+        //chart2.update();
+        //chart3.update();
         if (flagCount === 20)
         {
             console.log(performance.now());

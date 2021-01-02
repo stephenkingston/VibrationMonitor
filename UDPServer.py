@@ -19,7 +19,7 @@ def UDPProcess(a, queueObj):
     print("Started UDP Server Process..")
 
     while True:
-        data, address = serverSock.recvfrom(1024)
+        data, address = serverSock.recvfrom(4096)
         send_str = ''
         # print(data)
         for i in range(0, int(len(data)/6)):
