@@ -11,7 +11,21 @@
 </head>
 <body>
 <!--	<header class="header"></header>-->
-    <h1 class="header">VIBRATION DATA AND INFERENCE ENGINE</h1>
+    <h1 class="header">VIBRATION DATA AND INFERENCE ENGINE
+		<div class="button-bounding-box-left">
+			<button id="Upload CSV Data" class="button" value="Upload CSV"> Upload CSV </button>
+			<div id="sample-info"></div>
+		</div>
+
+
+		<div class="button-bounding-box">
+			<div id="storage-info"></div>
+			<button id="record" class="button" value="Start Recording"> Record </button>
+			<button id="download" class="button" value="Download as CSV"> Download as CSV </button>
+			<div id="about" onclick="(function(){
+									document.getElementById('aboutPopup').style.display = 'block';})()">i</div>
+		</div>
+	</h1>
 <div class="container">
 	<div class="block-cover">
 			<div class="block" id="channel1">
@@ -36,7 +50,7 @@
 		<div class = "block" id="inference">
 			<!-- # Inference -->
 			<h1 class="header">REAL-TIME ML INFERENCE</h1>
-			<h3 class="inferenceClass">Example result: Operation is normal.</h3>
+			<h3 class="inferenceClass"></h3>
 		</div>
 	</div>
 
