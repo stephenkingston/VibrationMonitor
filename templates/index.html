@@ -13,15 +13,21 @@
 <!--	<header class="header"></header>-->
     <h1 class="header">VIBRATION DATA AND INFERENCE ENGINE
 		<div class="button-bounding-box-left">
-			<button id="Upload CSV Data" class="button" value="Upload CSV"> Upload CSV </button>
-			<div id="sample-info"></div>
+			<button id="uploadCSV" class="button" value="Upload CSV"> Upload CSV </button>
+			<!-- Rectangular switch -->
+			<label class="switch">
+			  <input checked type="checkbox" id="streamSlider">
+			  <span class="slider"></span>
+			</label>
+
+			<div id="streaming-status"></div>
 		</div>
 
 
 		<div class="button-bounding-box">
 			<div id="storage-info"></div>
-			<button id="record" class="button" value="Start Recording"> Record </button>
-			<button id="download" class="button" value="Download as CSV"> Download as CSV </button>
+			<button id="recordCSV" class="button" value="Start Recording"> Record </button>
+			<button id="downloadCSV" class="button" value="Download as CSV"> Download as CSV </button>
 			<div id="about" onclick="(function(){
 									document.getElementById('aboutPopup').style.display = 'block';})()">i</div>
 		</div>

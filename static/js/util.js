@@ -1,5 +1,8 @@
 reflowLayout();
 document.body.style.zoom = "100%";
+readSlider = document.getElementById("streamSlider");
+recordingState = false;
+var recordButton = document.getElementById("recordCSV");
 
 window.onresize = function(event) {
     reflowLayout();
@@ -27,3 +30,20 @@ function reflowLayout() {
         }
     }
 }
+
+readSlider.addEventListener('change', (event) => {
+    if(readSlider.checked) {
+        console.log("Streaming started.");
+        uploadButton.disabled = true;
+    }
+    else
+    {
+        console.log("Streaming stopped.");
+        uploadButton.disabled = false;
+    }
+});
+
+
+
+
+

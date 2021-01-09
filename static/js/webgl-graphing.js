@@ -1,3 +1,10 @@
+var uploadButton = document.getElementById("uploadCSV");
+var downloadButton = document.getElementById("downloadCSV");
+var recordButton = document.getElementById("recordCSV");
+
+downloadButton.disabled = true;
+uploadButton.disabled = true;
+
 main();
 
 function main() {
@@ -120,14 +127,37 @@ function main() {
 
     /* WebSockets */
 
-    var ws = new WebSocket("ws://127.0.0.1:5678/");
+    var ws_channel1 = new WebSocket("ws://127.0.0.1:5678/");
+    var ws_commandChannel = new WebSocket("ws://127.0.0.1:5679");
 
-    ws.onmessage = function (event) {
-            update(event.data);
+    ws_channel1.onmessage = function (event) {
+        if (readSlider.checked)
+        {
+             update(event.data);
+        }
     };
 
-    ws.connected = function () {
-        console.log("WebSockets: Connected")
+    ws_channel1.onopen = function () {
+        console.log("WebSockets Channel 1: Connected");
+    }
+
+    ws_commandChannel.onopen = function () {
+        console.log("CommandChannel: Connected");
+        ws_commandChannel.send("Hello Server");
+    }
+
+    ws_commandChannel.onmessage = function (event) {
+          console.log(event.data);
+    };
+
+    setInterval( function() { sendCommandToServer("Hello"); }, 10000 );
+
+    function sendCommandToServer(message) {
+        console.log("message");
+        if (ws_commandChannel.readyState === WebSocket.OPEN)
+        {
+            ws_commandChannel.send(message);
+        }
     }
 
     function bin2string(array){
@@ -143,6 +173,22 @@ function main() {
 	}
 	return result;
     }
+
+
+recordButton.addEventListener('click', (event) => {
+    if (recordingState == false)
+    {
+        recordingState = true;
+        recordButton.innerText = "Recording...";
+        ws_commandChannel.send("record");
+    }
+    else
+    {
+        recordingState = false;
+        recordButton.innerText = "Record";
+        ws_commandChannel.send("stop");
+    }
+});
 //const ev = setInterval(update, 20);
 
 //    document.getElementById('stop-btn').addEventListener('click', function () {
