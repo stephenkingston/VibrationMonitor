@@ -147,6 +147,20 @@ function main() {
     }
 
     ws_commandChannel.onmessage = function (event) {
+          if (event.data === "Started Recording")
+          {
+               recordButton.innerText = "Recording...";
+               recordingState = true;
+               recordButton.disabled = false;
+               downloadButton.disabled = true;
+          }
+          else if (event.data === "Stopped Recording")
+          {
+               recordButton.innerText = "Record";
+               recordingState = false;
+               recordButton.disabled = false;
+               downloadButton.disabled = false;
+          }
           console.log(event.data);
     };
 
@@ -178,14 +192,12 @@ function main() {
 recordButton.addEventListener('click', (event) => {
     if (recordingState == false)
     {
-        recordingState = true;
-        recordButton.innerText = "Recording...";
+        recordButton.disabled = true;
         ws_commandChannel.send("record");
     }
     else
     {
-        recordingState = false;
-        recordButton.innerText = "Record";
+        recordButton.disabled = true;
         ws_commandChannel.send("stop");
     }
 });
