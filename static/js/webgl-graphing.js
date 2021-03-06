@@ -12,7 +12,9 @@ function main() {
     const channel2 = document.getElementById('channel2');
     const channel3 = document.getElementById('channel3');
 
-    const dataSin = [];
+    const channelOne = [];
+	const channelTwo = [];
+	const channelThree = [];
     const dataCos = [];
     const chart1 = new TimeChart(channel1, {
         // debugWebGL: true,
@@ -21,7 +23,7 @@ function main() {
         series: [
             {
                 name: 'Channel 1 Accelerometer',
-                data: dataSin,
+                data: channelOne,
                 color: 'blue',
             },
         ],
@@ -47,7 +49,7 @@ function main() {
         series: [
             {
                 name: 'Channel 2 Accelerometer',
-                data: dataSin,
+                data: channelTwo,
                 color: 'blue',
             },
         ],
@@ -73,12 +75,12 @@ function main() {
         series: [
             {
                 name: 'Channel 3 Accelerometer',
-                data: dataSin,
+                data: channelThree,
                 color: 'blue',
             },
         ],
-        xRange: { min: 0, max: 50 }, //5 * 1000
-        yRange: { min: -10, max: +20},
+        xRange: { min: 0, max: 5*1000 }, //5 * 1000
+        yRange: { min: -2, max: +2},
         realTime: true,
         zoom: {
             x: {
@@ -92,58 +94,114 @@ function main() {
         },
     });
 
-    let pointCount = 0;
+    let points1Count = 0;
+	let points2Count = 0;
+	let points3Count = 0;
     let flagCount = 0;
 
     let x = 0;
 
-    function update(points_all) {
-        if (flagCount == 0)
-        {
-            x = performance.now();
-            flagCount = 1;
-        }
-        else
-            flagCount++;
-
+    function updateChart1(points_all) {
         let points = points_all.split(',');
 
         points.forEach((point, index) => {
-            dataSin.push({ x: pointCount, y: (+point) });
-            pointCount++;
+            channelOne.push({ x: points1Count, y: (+point) });
+            points1Count++;
         });
         chart1.update();
-        //chart2.update();
-        //chart3.update();
-        if (flagCount === 20)
-        {
-            console.log(performance.now());
-            console.log(performance.now() - x);
-        }
+    }
+
+    function updateChart2(points_all) {
+        let points = points_all.split(',');
+
+        points.forEach((point, index) => {
+            channelTwo.push({ x: points2Count, y: (+point) });
+            points2Count++;
+        });
+        chart2.update();
+    }
+
+    function updateChart3(points_all) {
+        let points = points_all.split(',');
+
+        points.forEach((point, index) => {
+            channelThree.push({ x: points3Count, y: (+point) });
+            points3Count++;
+        });
+        chart3.update();
     }
 
     chart1.options.realTime = true;
     chart2.options.realTime = true;
+	chart3.options.realTime = true;
 
     /* WebSockets */
 
-    var ws_channel1 = new WebSocket("ws://127.0.0.1:5678/");
-    var ws_commandChannel = new WebSocket("ws://127.0.0.1:5679");
+    var ws_channel1 = new WebSocket("ws://127.0.0.1:1111/");
+	var ws_channel2 = new WebSocket("ws://127.0.0.1:2222/");
+	var ws_channel3 = new WebSocket("ws://127.0.0.1:3333/");
+    var ws_commandChannel = new WebSocket("ws://127.0.0.1:4444");
 
     ws_channel1.onmessage = function (event) {
         if (readSlider.checked)
         {
-             update(event.data);
+             updateChart1(event.data);
+        }
+    };
+	
+	ws_channel2.onmessage = function (event) {
+        if (readSlider.checked)
+        {
+             updateChart2(event.data);
+        }
+    };
+	
+	ws_channel3.onmessage = function (event) {
+        if (readSlider.checked)
+        {
+             updateChart3(event.data);
         }
     };
 
     ws_channel1.onopen = function () {
         console.log("WebSockets Channel 1: Connected");
     }
+	ws_channel2.onopen = function () {
+        console.log("WebSockets Channel 2: Connected");
+    }
+	ws_channel3.onopen = function () {
+        console.log("WebSockets Channel 3: Connected");
+    }
 
     ws_commandChannel.onopen = function () {
         console.log("CommandChannel: Connected");
         ws_commandChannel.send("Hello Server");
+    }
+
+    ws_channel1.onclose = function () {
+        console.log("WebSockets Channel 1: Disconnected, Reconnecting...");
+        setTimeout(function() {
+          ws_channel1 = new WebSocket("ws://127.0.0.1:1111/");
+        }, 1000);
+    }
+	ws_channel2.onclose = function () {
+        console.log("WebSockets Channel 2: Disconnected, Reconnecting...");
+        setTimeout(function() {
+          ws_channel2 = new WebSocket("ws://127.0.0.1:2222/");
+        }, 1000);
+    }
+	ws_channel3.onclose = function () {
+        console.log("WebSockets Channel 3: Disconnected, Reconnecting...");
+        setTimeout(function() {
+          ws_channel3 = new WebSocket("ws://127.0.0.1:3333/");
+        }, 1000);
+    }
+
+    ws_commandChannel.onclose = function () {
+        console.log("CommandChannel: Disconnected, Reconnecting...");
+        setTimeout(function() {
+          ws_commandChannel = new WebSocket("ws://127.0.0.1:4444/");
+        }, 1000);
     }
 
     ws_commandChannel.onmessage = function (event) {
@@ -164,7 +222,7 @@ function main() {
           console.log(event.data);
     };
 
-    setInterval( function() { sendCommandToServer("Hello"); }, 10000 );
+    setInterval( function() { sendCommandToServer("Looking good from client!"); }, 100000 );
 
     function sendCommandToServer(message) {
         console.log("message");

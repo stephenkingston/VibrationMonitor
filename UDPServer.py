@@ -3,19 +3,21 @@ import time
 
 UDP_IP_ADDRESS = "192.168.0.150"
 UDP_PORT_NO_1 = 6789
+UDP_PORT_NO_2 = 6790
+UDP_PORT_NO_3 = 6791
 serverSock = ''
 
 
-def UDPProcess(a, queueObj):
+def UDPProcess(UDP_PORT, queueObj):
     global serverSock
     try:
         serverSock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        serverSock.bind((UDP_IP_ADDRESS, UDP_PORT_NO_1))
+        serverSock.bind((UDP_IP_ADDRESS, UDP_PORT))
     except Exception as e:
         print("UDP Server Start Failed. Retrying...")
         print(e)
         UDPProcess(1, queueObj)
-        time.sleep(20)
+        time.sleep(5)
     print("Started UDP Server Process..")
 
     while True:

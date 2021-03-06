@@ -3,33 +3,41 @@ import websockets
 from functools import partial
 import os
 
+WEBSOCKETS_PORT1 = 1111
+WEBSOCKETS_PORT2 = 2222
+WEBSOCKETS_PORT3 = 3333
+WEBSOCKETS_COMMAND_PORT = 4444
+
 
 async def getFileHandle(file_path):
     try:
         os.remove(file_path)
     except Exception as e:
         pass
-    writeFlag = False
     file_handle = open(file_path, 'a')
     return file_handle
 
 
-async def commandhandler(websocket, path, commandQueue):
+async def commandHandler(websocket, path, commandProp):
     print("Started CommandHandler server..")
     while True:
         command = await websocket.recv()
         print(command)
         if command == "record":
-            commandQueue.put("record")
+            commandProp.channel1CommandProp.put("record")
+            commandProp.channel2CommandProp.put("record")
+            commandProp.channel3CommandProp.put("record")
             await websocket.send("Started Recording")
         if command == "stop":
-            commandQueue.put("stop")
+            commandProp.channel1CommandProp.put("stop")
+            commandProp.channel2CommandProp.put("stop")
+            commandProp.channel3CommandProp.put("stop")
             await websocket.send("Stopped Recording")
 
 
-async def channel1handler(websocket, path, commandQueue, dataQueue):
-    print("Started Channel1 server..")
-    filename1 = 'static/record_channel1.csv'
+async def channelHandler(websocket, path, filepath, commandQueue, dataQueue):
+    print("Started Channel server..")
+    filename1 = filepath
     file_handle1 = None
     writeFlag = False
 
@@ -53,24 +61,21 @@ async def channel1handler(websocket, path, commandQueue, dataQueue):
         await asyncio.sleep(0.0001)
 
 
-def runWebSockets(a, commandQueue, channel1queue):
-    filename1 = 'record_channel1.csv'
-    filename2 = 'record_channel2.csv'
-    filename3 = 'record_channel3.csv'
+def runWebSockets(port, dataQueue, commandPropQueue, filepath):
     try:
-        os.remove(filename1)
-        os.remove(filename2)
-        os.remove(filename3)
+        os.remove(filepath)
     except Exception as e:
+        print(e)
         pass
 
-    file_handle2 = open("static/" + filename2, 'a')
-    file_handle3 = open("static/" + filename3, 'a')
-
-    channel1QueueHandler = partial(channel1handler, commandQueue=commandQueue, dataQueue=channel1queue)
-    commandQueueHandler = partial(commandhandler, commandQueue=commandQueue)
-    channel1Server = websockets.serve(channel1QueueHandler, "127.0.0.1", 5678)
-    commandServer = websockets.serve(commandQueueHandler, "127.0.0.1", 5679)
+    channelQueueHandler = partial(channelHandler, filepath=filepath, commandQueue=commandPropQueue, dataQueue=dataQueue, )
+    channel1Server = websockets.serve(channelQueueHandler, "127.0.0.1", port)
     asyncio.get_event_loop().run_until_complete(channel1Server)
+    asyncio.get_event_loop().run_forever()
+
+
+def runWebSocketsCommands(a, prop):
+    commandQueueHandler = partial(commandHandler, commandProp=prop)
+    commandServer = websockets.serve(commandQueueHandler, "127.0.0.1", WEBSOCKETS_COMMAND_PORT)
     asyncio.get_event_loop().run_until_complete(commandServer)
     asyncio.get_event_loop().run_forever()
