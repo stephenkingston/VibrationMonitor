@@ -18,20 +18,20 @@ async def getFileHandle(file_path):
     return file_handle
 
 
-async def commandHandler(websocket, path, commandProp):
+async def commandHandler(websocket, path, c1prop, c2prop ,c3prop):
     print("Started CommandHandler server..")
     while True:
         command = await websocket.recv()
         print(command)
         if command == "record":
-            commandProp.channel1CommandProp.put("record")
-            commandProp.channel2CommandProp.put("record")
-            commandProp.channel3CommandProp.put("record")
+            c1prop.put("record")
+            c2prop.put("record")
+            c3prop.put("record")
             await websocket.send("Started Recording")
         if command == "stop":
-            commandProp.channel1CommandProp.put("stop")
-            commandProp.channel2CommandProp.put("stop")
-            commandProp.channel3CommandProp.put("stop")
+            c1prop.put("stop")
+            c2prop.put("stop")
+            c3prop.put("stop")
             await websocket.send("Stopped Recording")
 
 
@@ -57,7 +57,7 @@ async def channelHandler(websocket, path, filepath, commandQueue, dataQueue):
                     file_handle1.write(data)
                 await websocket.send(data)
             except Exception as e:
-                pass
+                print(e)
         await asyncio.sleep(0.0001)
 
 
@@ -68,14 +68,14 @@ def runWebSockets(port, dataQueue, commandPropQueue, filepath):
         print(e)
         pass
 
-    channelQueueHandler = partial(channelHandler, filepath=filepath, commandQueue=commandPropQueue, dataQueue=dataQueue, )
+    channelQueueHandler = partial(channelHandler, filepath=filepath, commandQueue=commandPropQueue, dataQueue=dataQueue)
     channel1Server = websockets.serve(channelQueueHandler, "127.0.0.1", port)
     asyncio.get_event_loop().run_until_complete(channel1Server)
     asyncio.get_event_loop().run_forever()
 
 
-def runWebSocketsCommands(a, prop):
-    commandQueueHandler = partial(commandHandler, commandProp=prop)
+def runWebSocketsCommands(a, command1prop, command2prop, command3prop):
+    commandQueueHandler = partial(commandHandler, c1prop=command1prop, c2prop=command2prop, c3prop=command3prop)
     commandServer = websockets.serve(commandQueueHandler, "127.0.0.1", WEBSOCKETS_COMMAND_PORT)
     asyncio.get_event_loop().run_until_complete(commandServer)
     asyncio.get_event_loop().run_forever()

@@ -39,7 +39,7 @@ if __name__ == "__main__":
                                 args=(webSockets.WEBSOCKETS_PORT3, prop.clientDataQueue3,
                                       prop.channel3CommandProp, 'static/record_channel3.csv'))
     websocketCommands = Process(target=webSockets.runWebSocketsCommands,
-                                args=(webSockets.WEBSOCKETS_COMMAND_PORT, prop))
+                                args=(webSockets.WEBSOCKETS_COMMAND_PORT, prop.channel1CommandProp, prop.channel2CommandProp, prop.channel3CommandProp))
 
     udpProcess_channel1.start()
     udpProcess_channel2.start()
