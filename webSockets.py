@@ -40,6 +40,10 @@ async def channelHandler(websocket, path, filepath, commandQueue, dataQueue):
     filename1 = filepath
     file_handle1 = None
     writeFlag = False
+    try:
+        os.remove(filename1)
+    except FileNotFoundError:
+        pass
 
     while True:
         while not dataQueue.empty():
@@ -54,11 +58,11 @@ async def channelHandler(websocket, path, filepath, commandQueue, dataQueue):
             try:
                 data = dataQueue.get()
                 if writeFlag:
-                    file_handle1.write(data)
+                    file_handle1.write(data + ',')
                 await websocket.send(data)
             except Exception as e:
                 print(e)
-        await asyncio.sleep(0.0001)
+        # await asyncio.sleep(0.0001)
 
 
 def runWebSockets(port, dataQueue, commandPropQueue, filepath):
