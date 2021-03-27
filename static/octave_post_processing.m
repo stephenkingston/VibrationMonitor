@@ -13,3 +13,5 @@ ff = fft(raw_row, nfft2)
 % Final Fourier transform
 fff = ff(1:nfft2/2)
 plot(abs(fff))
+
+
