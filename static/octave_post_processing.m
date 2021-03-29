@@ -1,4 +1,4 @@
-raw_row = csvread("record_channel3.csv");
+raw_row = csvread("Motor_loss.csv");
 readings_as_column = transpose(raw_row);
 
 sampling_frequency = 400;
