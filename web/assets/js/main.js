@@ -18,6 +18,7 @@ const state = {
   windowSec: 10,
   paused: false,
   pauseHeads: new Map(),
+  pauseDb: 0, // spectrogram colour scale frozen at pause time
   offsetSec: 0, // when paused: how far the view sits behind the pause point
   axes: [true, true, true],
   removeDc: false,
@@ -44,6 +45,11 @@ function viewHead(ch) {
 function viewTimes() {
   const end = state.paused ? -state.offsetSec : 0;
   return { start: end - state.windowSec, end };
+}
+
+/** Top of the spectrogram colour scale; held while paused so the image doesn't shift. */
+function spectrogramTop() {
+  return state.paused ? state.pauseDb : spectrogram.peakDb;
 }
 
 function liveChannels() {
@@ -76,6 +82,7 @@ function setPaused(paused) {
   state.paused = paused;
   if (paused) {
     state.pauseHeads = new Map(channels.map((ch) => [ch, ch.head]));
+    state.pauseDb = spectrogram.peakDb;
     state.offsetSec = 0;
   }
   document.body.classList.toggle('paused', paused);
@@ -168,8 +175,8 @@ function attachTimeInteractions(plot) {
     const before = state.windowSec;
     setWindow(before * Math.exp(delta * 0.0015));
     if (state.paused) {
-      // Keep the time under the cursor fixed
-      state.offsetSec += (state.windowSec - before) * (1 - u);
+      // Keep the time under the cursor fixed; while live the right edge stays pinned to now
+      state.offsetSec += (before - state.windowSec) * (1 - u);
       clampOffset();
     }
   }, { passive: false });
@@ -303,7 +310,8 @@ function updateSpectra() {
 
 function updateSpectrum(ch) {
   const sp = ch.spectrum;
-  if (!ch.hasData || !sp.update(ch.ring, Math.floor(viewHead(ch)) + 1, ch.rate, ch.scale, state.axes)) return;
+  const end = Math.floor(viewHead(ch)) + 1;
+  if (!ch.hasData || !sp.update(ch.ring, end, ch.rate, ch.scale, state.axes, !state.paused)) return;
   if (!ch.display || ch.display[0].length !== sp.bins) ch.display = [0, 1, 2].map(() => new Float32Array(sp.bins));
   let top = 0;
   for (let a = 0; a < 3; a++) {
@@ -319,8 +327,9 @@ function updateSpectrum(ch) {
   const ceiling = Math.ceil((20 * Math.log10(top + 1e-9) + 8) / 10) * 10;
   const [lo, hi] = state.spectrumDb ? [ceiling - 100, ceiling] : [0, Math.max(top * 1.25, 1e-3)];
   if (!ch.specRange) ch.specRange = { lo, hi };
-  ch.specRange.lo += (lo - ch.specRange.lo) * 0.25;
-  ch.specRange.hi += (hi - ch.specRange.hi) * 0.25;
+  const ease = state.paused ? 1 : 0.25; // nothing to smooth when the data isn't moving
+  ch.specRange.lo += (lo - ch.specRange.lo) * ease;
+  ch.specRange.hi += (hi - ch.specRange.hi) * ease;
 }
 
 function formatRate(rate) {
@@ -336,7 +345,7 @@ function updateStats(now) {
     rate.classList.toggle('waiting', !ch.hasData);
     if (!ch.hasData) continue;
     ch.updateStats(viewHead(ch));
-    const [value, unit] = formatRate(ch.rate);
+    const [value, unit] = formatRate(ch.measuredRate);
     $('.value', rate).textContent = value;
     $('.unit', rate).textContent = unit;
     ch.dom.stats.forEach(({ li, rms, peak }, a) => {
@@ -349,9 +358,10 @@ function updateStats(now) {
 
   const sg = spectrogram;
   if (sg.bins && sg.channel?.rate) {
-    $('#db-max').textContent = `${Math.round(sg.peakDb)} dB`;
-    $('#db-mid').textContent = `${Math.round(sg.peakDb - 40)}`;
-    $('#db-min').textContent = `${Math.round(sg.peakDb - 80)} dB`;
+    const top = spectrogramTop();
+    $('#db-max').textContent = `${Math.round(top)} dB`;
+    $('#db-mid').textContent = `${Math.round(top - 40)}`;
+    $('#db-min').textContent = `${Math.round(top - 80)} dB`;
     $('#sg-fft').textContent = `${sg.size} pt Hann`;
     $('#sg-df').textContent = formatHz(sg.channel.rate / sg.size);
     $('#sg-dt').textContent = formatSeconds(sg.hop / sg.channel.rate, sg.hop / sg.channel.rate / 10);
@@ -493,8 +503,8 @@ function drawSpectrogramPlot(plot) {
     fLo: fLo / fHi,
     fHi: 1,
     log: state.logFreq,
-    dbMin: sg.peakDb - 80,
-    dbMax: sg.peakDb,
+    dbMin: spectrogramTop() - 80,
+    dbMax: spectrogramTop(),
   });
   const hover = state.hover;
   if (hover && hover.plot.kind !== 'spectrum') overlay.crosshair(rect, hover.u * rect.width);

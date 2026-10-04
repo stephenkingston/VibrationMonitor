@@ -3,6 +3,9 @@ import { SampleRing } from './ring.js';
 import { Spectrum } from './dsp.js';
 
 export const HISTORY_SECONDS = 30;
+// The traces' pixel columns are binned by sample index, so any change to the rate
+// used for layout re-bins them. Only follow the measured rate when it really moves.
+const RATE_HYSTERESIS = 0.001;
 const MAX_STATS_SAMPLES = 1 << 18;
 
 export class Channel {
@@ -13,7 +16,8 @@ export class Channel {
     this.scale = fullScaleG / 32768; // raw -> g
     this.ring = new SampleRing();
     this.spectrum = new Spectrum();
-    this.rate = 0;
+    this.rate = 0; // sample rate used for layout: steady
+    this.measuredRate = 0; // latest server estimate
     this.expected = null; // next sample index the server should send (u32)
     this.head = 0; // display playhead, absolute fractional sample index
     this.headReady = false;
@@ -39,7 +43,8 @@ export class Channel {
     }
     this.expected = (first + n) >>> 0;
     if (rate > 0) {
-      this.rate = rate;
+      this.measuredRate = rate;
+      if (!this.rate || Math.abs(rate / this.rate - 1) > RATE_HYSTERESIS) this.rate = rate;
       this.ring.reserve(rate * HISTORY_SECONDS);
     }
     this.ring.ingest(samples, n);

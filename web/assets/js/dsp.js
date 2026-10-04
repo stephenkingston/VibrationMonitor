@@ -105,7 +105,8 @@ export class Spectrum {
     this.fresh = [true, true, true];
   }
 
-  update(ring, end, rate, scale, axes) {
+  /** `smooth` averages successive spectra; pass false when the data isn't moving. */
+  update(ring, end, rate, scale, axes, smooth = true) {
     let size = stableSize(this.size, rate, (r) => Math.min(16384, Math.max(512, nextPow2(r * 0.5))));
     const available = end - ring.oldest;
     while (size > available && size > 64) size >>= 1;
@@ -131,7 +132,7 @@ export class Spectrum {
       loadSegment(ring, end - size, size, a, re, im, w);
       transform.transform(re, im);
       const amp = this.amp[a];
-      const alpha = this.fresh[a] ? 1 : 0.35;
+      const alpha = this.fresh[a] || !smooth ? 1 : 0.35;
       for (let k = 0; k < size / 2; k++) {
         amp[k] += (Math.sqrt(re[k] * re[k] + im[k] * im[k]) * norm - amp[k]) * alpha;
       }
