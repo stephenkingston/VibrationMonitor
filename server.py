@@ -30,7 +30,9 @@ SAMPLE_BYTES = 6
 FRAME_HEADER = struct.Struct("<BBHIf")
 FRAME_SAMPLES = 1
 FULL_SCALE_G = 16  # CTRL1_XL = 0x84 in the firmware selects +/-16 g
-RATE_WINDOW_S = 2.0
+RATE_WINDOW_S = 10.0  # long, so the time axis doesn't breathe as packet timing jitters
+RATE_MARK_S = 0.1  # spacing of (time, count) points in the rate fit
+RATE_UPDATE_S = 0.25
 IDLE_RESET_S = 0.5
 MAX_QUEUED_FRAMES = 512  # per client; frames beyond this are dropped for slow clients
 UDP_RECV_BUFFER = 4 * 1024 * 1024
@@ -47,28 +49,37 @@ class Channel:
         self.total = 0  # samples received
         self.sent = 0  # samples forwarded to clients
         self.rate = 0.0
+        self.rate_updated = 0.0
         self.last_packet = 0.0
-        self.marks = collections.deque()  # (time, total) for rate estimation
+        self.marks = collections.deque()  # (arrival time, total) points for the rate fit
 
     def receive(self, data):
         now = time.monotonic()
         if now - self.last_packet > IDLE_RESET_S:
-            # Stream (re)started: measure the rate from this packet onwards
-            self.marks.clear()
-            self.marks.append((now, self.total))
+            self.marks.clear()  # stream (re)started: measure the rate from here
         self.last_packet = now
         usable = len(data) - len(data) % SAMPLE_BYTES
         self.pending += memoryview(data)[:usable]
         self.total += usable // SAMPLE_BYTES
+        # Mark at packet arrival, so every point has the same phase relative to the sensor's bursts
+        if not self.marks or now - self.marks[-1][0] >= RATE_MARK_S:
+            self.marks.append((now, self.total))
 
     def update_rate(self, now):
-        if not self.marks or now - self.marks[-1][0] >= 0.25:
-            self.marks.append((now, self.total))
+        if now - self.rate_updated < RATE_UPDATE_S:
+            return
+        self.rate_updated = now
         while len(self.marks) > 2 and now - self.marks[0][0] > RATE_WINDOW_S:
             self.marks.popleft()
-        start, start_total = self.marks[0]
-        if now - start >= 0.25 and self.total > start_total:
-            self.rate = (self.total - start_total) / (now - start)
+        if len(self.marks) < 3 or self.marks[-1][0] - self.marks[0][0] < 0.25:
+            return  # keep the last estimate while too little data is available
+        # Least-squares slope of sample count against time
+        t0, n0 = self.marks[0]
+        ts = [t - t0 for t, _ in self.marks]
+        ns = [n - n0 for _, n in self.marks]
+        mean_t, mean_n = sum(ts) / len(ts), sum(ns) / len(ns)
+        var = sum((t - mean_t) ** 2 for t in ts)
+        self.rate = sum((t - mean_t) * (n - mean_n) for t, n in zip(ts, ns)) / var
 
     def take_frame(self):
         if not self.pending:
