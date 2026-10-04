@@ -60,9 +60,12 @@ async def channelHandler(websocket, path, filepath, commandQueue, dataQueue):
                 if writeFlag:
                     file_handle1.write(data + ',')
                 await websocket.send(data)
+            except websockets.ConnectionClosed:
+                print("Channel client disconnected")
+                return
             except Exception as e:
                 print(e)
-        # await asyncio.sleep(0.0001)
+        await asyncio.sleep(0.0001)
 
 
 def runWebSockets(port, dataQueue, commandPropQueue, filepath):

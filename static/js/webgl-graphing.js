@@ -1,3 +1,7 @@
+// Must match the sensor output data rate (mockSensor.py --rate) so the x-axis is in real time
+const SAMPLE_RATE_HZ = 10000;
+const WINDOW_SECONDS = 10;
+
 var uploadButton = document.getElementById("uploadCSV");
 var downloadButton = document.getElementById("downloadCSV");
 var recordButton = document.getElementById("recordCSV");
@@ -27,7 +31,7 @@ function main() {
                 color: 'blue',
             },
         ],
-        xRange: { min: 0, max: 5 * 1000 },
+        xRange: { min: 0, max: WINDOW_SECONDS * 1000 },
         yRange: { min: -2, max: +2},
         realTime: true,
         zoom: {
@@ -53,7 +57,7 @@ function main() {
                 color: 'blue',
             },
         ],
-        xRange: { min: 0, max: 5 * 1000 },
+        xRange: { min: 0, max: WINDOW_SECONDS * 1000 },
         yRange: { min: -2, max: +2},
         realTime: true,
         zoom: {
@@ -79,7 +83,7 @@ function main() {
                 color: 'blue',
             },
         ],
-        xRange: { min: 0, max: 5*1000 }, //5 * 1000
+        xRange: { min: 0, max: WINDOW_SECONDS * 1000 },
         yRange: { min: -2, max: +2},
         realTime: true,
         zoom: {
@@ -105,7 +109,7 @@ function main() {
         let points = points_all.split(',');
 
         points.forEach((point, index) => {
-            channelOne.push({ x: points1Count, y: (+point) });
+            channelOne.push({ x: points1Count * 1000 / SAMPLE_RATE_HZ, y: (+point) });
             points1Count++;
         });
         chart1.update();
@@ -115,7 +119,7 @@ function main() {
         let points = points_all.split(',');
 
         points.forEach((point, index) => {
-            channelTwo.push({ x: points2Count, y: (+point) });
+            channelTwo.push({ x: points2Count * 1000 / SAMPLE_RATE_HZ, y: (+point) });
             points2Count++;
         });
         chart2.update();
@@ -125,7 +129,7 @@ function main() {
         let points = points_all.split(',');
 
         points.forEach((point, index) => {
-            channelThree.push({ x: points3Count, y: (+point) });
+            channelThree.push({ x: points3Count * 1000 / SAMPLE_RATE_HZ, y: (+point) });
             points3Count++;
         });
         chart3.update();

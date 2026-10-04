@@ -1,7 +1,7 @@
 import socket
 import time
 
-UDP_IP_ADDRESS = "192.168.1.100"
+UDP_IP_ADDRESS = "0.0.0.0"
 UDP_PORT_NO_1 = 6789
 UDP_PORT_NO_2 = 6790
 UDP_PORT_NO_3 = 6791

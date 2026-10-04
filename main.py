@@ -1,4 +1,4 @@
-from multiprocessing import Process, Queue
+from multiprocessing import Process, Queue, active_children
 import UDPServer
 import flaskServer
 import webSockets
@@ -49,3 +49,8 @@ if __name__ == "__main__":
     websocketProcess2.start()
     websocketProcess3.start()
     websocketCommands.start()
+
+    # Keep the parent alive: with the "spawn" start method (macOS default) the
+    # queues are torn down if the parent exits before the children attach.
+    for process in active_children():
+        process.join()
