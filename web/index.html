@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Vibration Monitor</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230b1020'/%3E%3Cpath d='M4 17h5l3-8 4 15 4-12 2 5h6' fill='none' stroke='%2338bdf8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="assets/app.css">
+  <script type="module" src="assets/js/main.js"></script>
+</head>
+<body>
+  <canvas id="grid-layer" aria-hidden="true"></canvas>
+  <canvas id="gl-layer" aria-hidden="true"></canvas>
+
+  <header class="topbar">
+    <div class="brand">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M3 17h5l3-8 4 15 4-12 2 5h8" /></svg>
+      <span>Vibration Monitor</span>
+    </div>
+    <div class="status" id="status" data-state="connecting"><span class="dot"></span><span class="label">Connecting…</span></div>
+
+    <div class="controls">
+      <div class="group" role="group" aria-label="Time window">
+        <span class="group-label">Window</span>
+        <div class="segmented" id="window-select">
+          <button data-value="0.1">100 ms</button>
+          <button data-value="1">1 s</button>
+          <button data-value="5">5 s</button>
+          <button data-value="10">10 s</button>
+          <button data-value="30">30 s</button>
+        </div>
+      </div>
+      <div class="group" role="group" aria-label="Vertical scale">
+        <span class="group-label">Scale</span>
+        <div class="segmented" id="scale-select">
+          <button data-value="0">Auto</button>
+          <button data-value="2">±2 g</button>
+          <button data-value="4">±4 g</button>
+          <button data-value="16">±16 g</button>
+        </div>
+      </div>
+      <div class="group" role="group" aria-label="Axes">
+        <div class="chips" id="axis-toggles">
+          <button class="chip axis" data-axis="0" aria-pressed="true">X</button>
+          <button class="chip axis" data-axis="1" aria-pressed="true">Y</button>
+          <button class="chip axis" data-axis="2" aria-pressed="true">Z</button>
+        </div>
+        <button class="chip" id="dc-toggle" aria-pressed="false" title="Remove the DC offset (gravity) from each axis">AC</button>
+      </div>
+      <div class="group" role="group" aria-label="Spectrum">
+        <span class="group-label">Spectrum</span>
+        <div class="segmented" id="spectrum-units">
+          <button data-value="db">dB</button>
+          <button data-value="lin">g</button>
+        </div>
+        <button class="chip" id="log-toggle" aria-pressed="false" title="Logarithmic frequency axis">log f</button>
+      </div>
+      <button class="btn" id="pause-btn" title="Pause or resume (Space)">
+        <svg viewBox="0 0 16 16" class="icon-pause" aria-hidden="true"><rect x="3.5" y="2.5" width="3" height="11" rx="1" /><rect x="9.5" y="2.5" width="3" height="11" rx="1" /></svg>
+        <svg viewBox="0 0 16 16" class="icon-play" aria-hidden="true"><path d="M4.5 2.8v10.4a.6.6 0 0 0 .9.5l8.2-5.2a.6.6 0 0 0 0-1L5.4 2.3a.6.6 0 0 0-.9.5z" /></svg>
+        <span>Pause</span>
+      </button>
+      <button class="btn" id="export-btn" title="Download the samples in view as CSV">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v8m0 0L5 7m3 3 3-3M3 12.5h10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg>
+        <span>Export CSV</span>
+      </button>
+    </div>
+
+    <div class="perf" id="perf" title="Frame rate, JavaScript time per frame, total samples per second and network throughput">
+      <span id="perf-fps">— fps</span>
+      <span id="perf-rate">—</span>
+    </div>
+  </header>
+
+  <main class="dashboard" id="dashboard">
+    <section class="panel spectrogram-row" id="spectrogram-row">
+      <div class="side">
+        <h2>Spectrogram</h2>
+        <div class="segmented small" id="spectrogram-channel"></div>
+        <div class="segmented small" id="spectrogram-axis">
+          <button data-value="3" title="Power summed over X, Y and Z">All</button>
+          <button data-value="0">X</button>
+          <button data-value="1">Y</button>
+          <button data-value="2">Z</button>
+        </div>
+        <p class="hint">Drag to pan, scroll to zoom, double-click for live.</p>
+      </div>
+      <div class="plot-cell"><div class="plot" id="spectrogram-plot"></div></div>
+      <div class="legend">
+        <div class="colorbar"></div>
+        <div class="colorbar-labels"><span id="db-max">—</span><span id="db-mid"></span><span id="db-min">—</span></div>
+        <dl class="spectro-info">
+          <dt>Scale</dt><dd>dB re 1 g</dd>
+          <dt>FFT</dt><dd id="sg-fft">—</dd>
+          <dt>Δf</dt><dd id="sg-df">—</dd>
+          <dt>Δt</dt><dd id="sg-dt">—</dd>
+        </dl>
+      </div>
+    </section>
+  </main>
+
+  <div class="tooltip" id="tooltip" hidden></div>
+  <div class="fatal" id="fatal" hidden></div>
+</body>
+</html>
